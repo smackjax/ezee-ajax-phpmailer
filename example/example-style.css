@@ -1,0 +1,12 @@
+form {
+    display: flex;
+    flex-direction: column;
+}
+form > * {
+    margin: 5px auto;
+}
+form input,
+form select,
+form button { 
+    padding: 10px;
+} 

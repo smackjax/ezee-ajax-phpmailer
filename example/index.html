@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Example use of ezee-ajax-json-form</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="./example-style.css" />
+    <!-- Font awesome. Because it's awesome. -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+</head>
+<body>
+    <form onsubmit='handleContactForm' class="ezee-ajax-form">
+        <label for='name' class="input-block">
+            <span>
+                <span class='fas fa-user-astronaut'></span> Name
+            </span>
+            <input 
+            value='Man Guy'
+            placeholder="Man Guy"
+            name='name'
+            type='text' id='name'/>
+        </label>
+
+        <label for='phone' class="input-block">
+            <span>
+                <span class='fas fa-phone'></span> Phone
+            </span>
+            <input 
+            value='(555) 555-5555'
+            placeholder='(555) 555-5555'
+            name='phone'
+            type='tel' id='phone' />
+        </label>
+
+        <label for='email' class="input-block">
+            <span>
+                <span class='fas fa-envelope'></span> Email
+            </span>
+            <input 
+            value='man@guy.com'
+            placeholder="man@guy.com"
+            name='email'
+            type='email' id='email' />
+        </label>
+
+        <label for='message' class="input-block">
+            <span>
+                <span class='fas fa-comment-alt'></span> Message
+            </span>
+            <textarea name='message' id='message'>Man Guy will never die!</textarea>
+        </label>
+
+        <label>
+            <span>
+                <span class='fas fa-car'></span> Car
+            </span>
+            <select name="cars">
+                <option value="volvo">Volvo</option>
+                <option default value="saab">Saab</option>
+                <option value="fiat">Fiat</option>
+                <option value="audi">Audi</option>
+            </select>
+        </label>
+
+        <button type='submit'>
+            Send
+        </button>
+    </form>
+    
+    <div
+    style='margin-top: 20px;' 
+    id="output-test">
+    </div>
+
+    <script src='./example-form-handler-script.js'></script>
+    <script src='./convert-form-vals-to-obj.js'></script>
+
+</body>
+</html>
