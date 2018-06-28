@@ -1,4 +1,5 @@
 <?php 
+require_once("email_login.php");
 // All addresses besides the email used to sign into the server can be formatted as array with shape
     // ['address@somewhere.com', 'A name to send by']
 // GLOBAL['ezee_email_vals']['post-key'] holds all sanitized input values if everything goes well
@@ -16,7 +17,7 @@ $ezee_email_send_from_config = [
     'server' => 'smtp.gmail.com', // Can also take secondary server separated by a comma
     'email' => 'smackjax@gmail.com', // Email address on server
     // or ['address', 'name'](name will be applied to send_as)
-    'password' => '' // Password for address server
+    'password' => $my_secret_pass, // Password for address server
     'send_as' => 'otherEmail@somewhere.com' // (optional) defaults to value in 'email'
     // or ['address', 'name']
 ];

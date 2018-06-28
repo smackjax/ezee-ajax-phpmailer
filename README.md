@@ -76,7 +76,7 @@ while a "fail" status sets the reason a key failed under `"failed"`
 ```javascript
 { // Server errors
     "status" : "error", 
-    "message" : "Error message"
+    "message" : "(Error message")
 }
 ```
 ### Failure(probably user error)
@@ -87,15 +87,26 @@ while a "fail" status sets the reason a key failed under `"failed"`
         {
             // Holds keys of any values that failed validation of their format
             "failed": {
-                "phone": 'Invalid format',
-                "email": 'Invalid format'/*,...etc*/
+                "phone": "Invalid format",
+                "email": "Invalid format",
+                "message": "No value recieved",
+                "favorite-food" : "Required; no key sent",
+                "hidden-field" : "Value did not match required value",
+                /*,...etc*/
             },
-            "sent": { 
+            // Values the server received
+            "raw": { 
                 "name"  : "(Raw value)", 
                 "phone" : "(Raw value)", 
                 "email" : "(Raw value)"
                 // ...etc
             },
+            // The values after being sanitized
+            "sanitized": {
+                "name"  : "(Sanitized value)", 
+                "phone" : "(Sanitized value)", 
+                "email" : "(Sanitized value)"
+            }
             //  Other failure conditions will be under keys here, but not server error conditions
         }
 }
@@ -105,13 +116,19 @@ while a "fail" status sets the reason a key failed under `"failed"`
 { // Success
     "status" : "success",
     "data" : { 
-        // The values sent
-        "sent": {
+        // Values the server received
+        "raw": {
             "name"    : "(Raw value)",
             "phone"   : "(Raw value)",
             "message" : "(Raw value)"
             // ...etc
-        }
+        },
+        // The values after being sanitized
+        "sanitized": {
+                "name"  : "(Sanitized value)", 
+                "phone" : "(Sanitized value)", 
+                "email" : "(Sanitized value)"
+            }
     }
     // Values will be sanitized as per their format before being emailed.
 }

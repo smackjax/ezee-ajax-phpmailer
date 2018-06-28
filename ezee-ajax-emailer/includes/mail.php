@@ -28,6 +28,7 @@ function send_email(){
     $from_email_address = make_email_array($from['email']);
 
     try {
+ 
         //Server settings
         $mail->SMTPDebug    = 0; // Enable verbose debug output
         $mail->isSMTP();        // Set mailer to use SMTP

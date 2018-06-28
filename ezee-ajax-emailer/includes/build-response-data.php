@@ -49,15 +49,15 @@ function sanitize_value($value, $format) {
         $digits = preg_replace('/[^0-9]/','',$value);
         // Formats phone number to make it pretty
         $formatted_number = '';
-        if ( strlen($digits) == 11 ) { 
+        if ( strlen($digits) >= 11 ) { 
             $formatted_number .= ('+' . $digits[0] . ' ');
             $digits = substr($digits, 1, 10);
         }
-        if ( strlen($digits) == 10 ) { 
+        if ( strlen($digits) >= 10 ) { 
             $formatted_number .= ('(' . substr($digits, 0, 3) . ') '); 
             $digits = substr($digits, 3, 9);
         }
-        if ( strlen($digits) == 7 ) { 
+        if ( strlen($digits) >= 7 ) { 
             $formatted_number .=  (substr($digits, 0, 3) . '-' .substr($digits, 3, 7) );
         }
         return $formatted_number;
@@ -107,45 +107,49 @@ function get_email_val_data($raw_email_vals) {
         if($array_check && !is_null($posted_val['format'])){
             $format = $posted_val['format'];
         } else {
+            // Otherwise check for default format
             $format = get_value_format($key);
         }
 
         // Validate by format
         $is_valid = check_value_validity($raw_value, $format);
-        // Sanitize by format or, if invalid, return string unchanged
         
-
         // If validation failed
         if(!$is_valid) {
             // Make sure $invalid_keys is prepped
             if(!is_array($invalid_keys)){ 
                 $invalid_keys = []; 
             }
-            $invalid_keys[$key] = is_null($posted_val) ?
-            'Value was null(probably no value sent)' : 'Invalid format';
 
-            // Push value key to track that it's invalid
-            
-            // Store raw invalid value
-            $email_vals[$key] = $raw_value;
-        } else {
-            // Push key with its sanitized value to be returned in response 
-            $sanitized_value = $is_valid ? sanitize_value($raw_value, $format) : $raw_value;
-            $cleaned_vals[$key] = $sanitized_value;
-            // Return raw received value to ajax
-            $email_vals[$key] = $raw_value;
+            $fail_message = 'Invalid format';
+            if(is_null($posted_val) ) { 
+                $fail_message = 'Value was null(probably no value sent)'; 
+            }            
+            // TODO fail 'required' and 'does not match required value'
+            $invalid_keys[$key] = $fail_message;
         }
+
+        // Store raw value
+        $email_vals[$key] = $raw_value;
+        // Sanitize and store value to be returned in response 
+        $sanitized_value = sanitize_value($raw_value, $format);
+        $cleaned_vals[$key] = $sanitized_value;
     }
 
+    // Holds response object
     $return_vals = [];
-    $return_vals['sent_vals'] = $email_vals;
-    if($invalid_keys != false){ $return_vals['invalid_keys'] = $invalid_keys; }
-    else {
+    $return_vals['raw'] = $email_vals;
+    $return_vals['sanitized'] = $cleaned_vals;
+
+    // Only sets global cleaned values if no fail conditions
+    if($invalid_keys == false){ 
         $GLOBALS['ezee_email_vals'] = $cleaned_vals;
-        $return_vals['cleaned_vals'] = $cleaned_vals;
+    } else {
+        // Otherwise adds failed keys and their fail conditions to response data
+        $return_vals['failed']= $invalid_keys; 
     }
-    
-    // Return relevant values
+
+    // Return data
     return $return_vals;
 }
 

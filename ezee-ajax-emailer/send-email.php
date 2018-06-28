@@ -2,21 +2,18 @@
 try{
     // If POST request to this page
     if($_SERVER['REQUEST_METHOD'] == 'POST'){
-        require_once('includes/parse-email-vals.php');
+        require_once('includes/build-response-data.php');
         // Parse json values from posted values
         $email_vals = json_decode(file_get_contents('php://input'), true);
 
-        $response_code;
+        // Validates and sanitizes received data
         $response_data = new stdClass();
-
-        // Validates and sanitizes submitted data
-        $parsed_data = get_email_val_data($email_vals);
-        $response_data->sent = $parsed_data['sent_vals'];
+        $response_data = get_email_val_data($email_vals);
 
         // Checks for fail conditions
-        if(isset($parsed_data['invalid_keys'])){
-            $response_data->failed = $parsed_data['invalid_keys'];
-            $response_code = 400;
+        if(isset($response_data['failed']) && $response_data['failed'] !== false){
+            // If there are fail conditions, respond 400
+            respond_user_error($response_data);
         } else {
             //If no fail conditions, proceed with email
             // Mailer config
@@ -24,32 +21,41 @@ try{
             // Function to create default email body,
             // stores output in GLOBAL. 
             require_once('includes/create-default-email-body.php');
-            create_default_email_body($parsed_data['cleaned_vals']);
+            create_default_email_body($response_data['sanitized']);
             // Main PHPMailer function
             require_once('includes/mail.php');
             // Email data with main PHPMailer function
             // NOTE sanitized values are stored in a global by this point
             $email_result = send_email();
             // If result is 'true', everything went well
-            if($email_result === true) { $response_code = 200; }
+            if($email_result === true) {
+                respond_success($response_data);
+            }
             else {
                 // If result is anything else, it's a message of went wrong
-                header('Content-type: text/html', true, 500);
-                echo $email_result;
+                respond_server_error($email_result);
                 exit();
             }
         }
-
-        respond($response_code, $response_data);
     }
 
 } catch(Exception $e){
-    // If it get's here, something went very wrong
-    header('Content-type: text/plain', true, 500);
-    echo $e->getMessage();
+    respond_server_error($e->getMessage());
 }
 
-function respond($code, $data){
+function respond($code, $data_obj, $status){
     header('Content-type: application/json', true, $code);
-    echo json_encode($data);
+    $data_obj['status'] = $status;
+    echo json_encode($data_obj);
+}
+function respond_server_error($message){
+    $data = [];
+    $data['message'] = $message;
+    respond(500, $data, 'error');
+}
+function respond_user_error($data_obj){
+    respond(400, $data_obj, 'fail');
+}
+function respond_success($data_obj){
+    respond(200, $data_obj, 'success');
 }
