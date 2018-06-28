@@ -6,7 +6,6 @@ try{
         // Parse json values from posted values
         $email_vals = json_decode(file_get_contents('php://input'), true);
 
-        
         $response_code;
         $response_data = new stdClass();
 
@@ -16,7 +15,13 @@ try{
             $response_data->failed = $parsed_data['invalid_keys'];
             $response_code = 400;
         } else {
-            $email_body = create_email_body($parsed_data['cleaned_vals']);
+            // Mailer config
+            require_once('config.php');
+            // Function for default and alt email body(plain text )
+            require_once('includes/create-plain-text-email-body.php');
+            $email_body = create_plain_text_email_body($parsed_data['cleaned_vals']);
+            // PHPMailer function
+            require_once('includes/mail.php');
             // Email data 
             $email_success = send_email($email_body);
             if($email_result === true) { $response_code = 200; }

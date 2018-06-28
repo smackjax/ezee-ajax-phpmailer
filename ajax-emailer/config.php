@@ -7,7 +7,7 @@ $msg = $ezee_email_vals['message'];
 
 
 // Cnfiguration for where the email will be sent from
-$send_email_from_config = [
+$ezee_email_send_from_config = [
     'encryption_type' => 'tls', // 'ssl' or 'tls'
     'port' => 587, 
     'server' => 'smtp.gmail.com', // Can also take secondary server separated by a comma
@@ -18,8 +18,8 @@ $send_email_from_config = [
 ];
 
 // Config for where the email will be sent to
-$email_send_to_config = [
-    'to_email' => 'smackjax@gmail.com',
+$ezee_email_send_to_config = [
+    'addresses' => 'smackjax@gmail.com',
     // Address@somewhere.com
     // ['address@somewhere.com', 'Maximus Prime']
     /* [
@@ -27,27 +27,28 @@ $email_send_to_config = [
         ['address@somewhere.com', 'Maximus Prime']
     ]*/
     'subject' => "Contact from $name",
+    'reply_to' => 'somewhere@here.com'
+    // ['somewhere@else.com', 'my name']
 ]
 
-// Email configuration
+$ezee_email_body_config = [
+    'is_html' => true,
+    'template' => '
+        <html>
+            <h2>New contact request</h2>
+            <div>
+                <b>Name</b> $name
+            </div>
+            <div>
+                <b>Email</b> $email
+            </div>
+            <div>
+                <b>Message</b> 
+                <p>$msg </p>
+            </div>
+        </html> 
+    '
+];
 
-$email_body_is_html = true; // Defaults to false, which assumes the email is plain-text(see default email template)
-
-// Using email_body_template ejects from default template
-$email_body_template = "
-    <html>
-        <h2>New contact request</h2>
-        <div>
-            <b>Name</b> $name
-        </div>
-        <div>
-            <b>Email</b> $email
-        </div>
-        <div>
-            <b>Message</b> 
-            <p>$msg </p>
-        </div>
-    </html> 
-";
 
 ?>
