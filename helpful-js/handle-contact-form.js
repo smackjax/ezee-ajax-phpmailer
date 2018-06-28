@@ -9,7 +9,8 @@ function handleContactForm(formVals, formElement) {
     var dataWithFormats = prepJsonWithDefaultFormat(formVals);
     emailAjaxData(dataWithFormats)
     .then(resData=>{
-        console.log(resData);
+        console.log(JSON.parse(resData));
+        document.getElementById('output-test').innerHTML = resData;
     })
     // Network failure  
     .catch(e=>{
@@ -26,15 +27,5 @@ function emailAjaxData(data){
         }
     })
     // Return json server response
-    .then( res=>{ 
-        console.log(res.status);
-        return res.text();
-        
-    })
-    .then(textRes=>{
-        
-        document.getElementById('output-test').innerHTML = textRes;
-        // res.json() 
-        return textRes;
-    })
+    .then( res=>res.json() )
 }

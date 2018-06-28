@@ -62,3 +62,9 @@ $ezee_email_body_config = [
         </html> 
     "
 ];
+
+// (optional)
+$ezee_email_required_values = [
+    // If just a string, it means that key is required in submitted values
+    ['barry', 'trolo']
+];

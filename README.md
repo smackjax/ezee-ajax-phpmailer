@@ -84,31 +84,30 @@ while a "fail" status sets the reason a key failed under `"failed"`
 { // User errors
     "status" : "fail",
     "data" : { 
-        {
-            // Holds keys of any values that failed validation of their format
-            "failed": {
-                "phone": "Invalid format",
-                "email": "Invalid format",
-                "message": "No value recieved",
-                "favorite-food" : "Required; no key sent",
-                "hidden-field" : "Value did not match required value",
-                /*,...etc*/
-            },
-            // Values the server received
-            "raw": { 
-                "name"  : "(Raw value)", 
-                "phone" : "(Raw value)", 
-                "email" : "(Raw value)"
-                // ...etc
-            },
-            // The values after being sanitized
-            "sanitized": {
-                "name"  : "(Sanitized value)", 
-                "phone" : "(Sanitized value)", 
-                "email" : "(Sanitized value)"
-            }
-            //  Other failure conditions will be under keys here, but not server error conditions
+        // Holds keys of any values that failed validation of their format
+        "failed": {
+            "phone": "Invalid format",
+            "email": "Invalid format",
+            "message": "No value recieved",
+            "favorite-food" : "Required; no key sent",
+            "hidden-field" : "Value did not match required value",
+            /*,...etc*/
+        },
+        // Values the server received
+        "raw": { 
+            "name"  : "(Raw value)", 
+            "phone" : "(Raw value)", 
+            "email" : "(Raw value)"
+            // ...etc
+        },
+        // The values after being sanitized
+        "sanitized": {
+            "name"  : "(Sanitized value)", 
+            "phone" : "(Sanitized value)", 
+            "email" : "(Sanitized value)"
         }
+    }
+    // NOTE: If no data is sent, there will be a 'message' key here
 }
 ```
 ### Success
@@ -199,6 +198,16 @@ $ezee_email_body_config = [
         </html> 
     "
 ];
+
+// (optional)
+$ezee_email_required_values = [
+    // If array, key is required, and value under that key must match the second value
+    ['name', 'Cassandra'],
+    // If just a string, it means that key is required in submitted values
+    'not-there',
+    ['hidden-field', 'secret-pass']
+    // ^ key(req)         ^ value under key must match this
+];
 ```
 
 ### Minimal
@@ -218,9 +227,9 @@ $ezee_email_send_from_config = [
 // Where email is sent to
 $ezee_email_send_to_config = [
     'addresses' => [
-        'smackjax@gmail.com',
+        'liv.ia@kaboom.com',
         ['man@guy.com', 'Man Guy'],
-        [ 'iron_man@kaboom.com', 'Mr Stark', true ]  // <-- Will be CC
+        [ 'stark@tech.com', 'Mr Stark', true ]  // <-- Will be CC
     ],
     'subject' => "Contact from $name", // Sanitized values can be used here
 ];
