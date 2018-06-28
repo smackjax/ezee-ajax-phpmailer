@@ -33,7 +33,7 @@ function send_email(){
         $mail->isSMTP();        // Set mailer to use SMTP
         $mail->SMTPAuth     = true;  // Enable SMTP authentication
 
-        // SSL encryption
+        // Encryption
         if(isset($from['encryption_type'])){
             $mail->SMTPSecure   = $from['encryption_type']; // Enable TLS encryption, `ssl` also accepted     
         }
@@ -72,13 +72,10 @@ function send_email(){
         }
 
         // Reply to
-        $reply_to; 
         if(isset($to['reply_to'])){
             $reply_to = make_email_array($to['reply_to']); 
-        } else {
-            $reply_to = make_email_array($from_email_address); 
+            call_user_func_array([$mail, 'addReplyTo'], $reply_to); 
         }
-        call_user_func_array([$mail, 'addReplyTo'], $reply_to); 
     
         // --- Email details
         // Is html

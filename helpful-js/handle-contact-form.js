@@ -1,10 +1,12 @@
+// Bear in mind all of these files can be consolidated and minified. This is just for ease-of-use to see what's happening.
+
 var testOutput = document.getElementById('output-test');
-var url = '../ajax-emailer/send.php'
+var url = '../ezee-ajax-emailer/send-email.php'
 
 function handleContactForm(formVals, formElement) {
     // Set loading spinner
     // Get formats for each data name
-    var dataWithFormats = getEmailDataFormats(formVals);
+    var dataWithFormats = prepJsonWithDefaultFormat(formVals);
     emailAjaxData(dataWithFormats)
     .then(resData=>{
         console.log(resData);
@@ -13,30 +15,6 @@ function handleContactForm(formVals, formElement) {
     .catch(e=>{
         // Find out if this includes 500/400 codes
     })
-}
-
-var defaultEmailValFormats = {
-    'name' : 'text',
-    'email' : 'email',
-    'phone' : 'phone',
-    'message' : 'text',
-};
-
-function getEmailDataFormats(formVals) {
-    var inputNames = Object.keys(formVals);
-    var dataWithFormats = {};
-    for(var i = 0; i < inputNames.length; i++ ){
-        var iName = inputNames[i];
-        if(defaultEmailValFormats[iName]){
-            dataWithFormats[iName] = {
-                'value': formVals[iName],
-                'format' : defaultEmailValFormats[iName]
-            }
-        } else {
-            dataWithFormats[iName] = formVals[iName];
-        }
-    }
-    return dataWithFormats;
 }
 
 function emailAjaxData(data){
