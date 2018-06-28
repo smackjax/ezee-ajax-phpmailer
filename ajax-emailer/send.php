@@ -20,8 +20,8 @@ try{
             require_once('config.php');
             // Function to create default and alt email body(plain text )
             // stores output in GLOBAL
-            require_once('includes/create-plain-text-email-body.php');
-            create_plain_text_email_body($parsed_data['cleaned_vals']);
+            require_once('includes/create-default-email-body.php');
+            create_default_email_body($parsed_data['cleaned_vals']);
             // PHPMailer function
             require_once('includes/mail.php');
             // Email data 

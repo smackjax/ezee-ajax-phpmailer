@@ -6,10 +6,15 @@ I'll be updating this Readme to cut down on the final documentation, but everyth
 ## Some assumptions
 For ease-of-use the default config assumes encryption of some sort, defaults to 'ssl'.
 
+
 ## Notes
 * When submitting data as an array, `value` **has** to be set to something, even if just an empty string. Otherwise `value` will default to `null`
 * Phone numbers are parsed based on number of integers in the string: 7, 10, 11. Other chars in the string don't matter
 * All values recieved are always returned without being cleaned. Values are only cleaned according to their format when they are about to be emailed.
+* 'string' or 'text' format values are only stripped of html tags
+* Additional recipients added will be BCC'd, but it may not be reliable to tell who doesn't based on array order
+* If you use Google as the account to send from, it will send as your default account
+* It seems to only send html. I don't know why.
 
 ## Default input format types
 If the beginning of the key(separated by a dash) matches one of these strings, the format used to validate/clean the value will automatically set to the corresponding format shown here if no 'format' was passed in the JSON array.
@@ -25,10 +30,31 @@ $default_key_formats = [
     'float' => 'float',
     'int' => 'int',
     'num' => 'int',
-    'html' => 'html'
+    'html' => 'html' // Encodes with FILTER_SANITIZE_SPECIAL_CHARS 
 ];
 ```
 
+
+## Request JSON shapes
+```javascript
+// "emailVals": {
+//     "name": "Man Guy",
+//     -- OR ---
+//     "name": {
+//         "format" : "text",
+//         "value" : "Man Guy"
+//     },
+//     "email" : { 
+//         "format" : "email",
+//         "value" : "somewhere@here.com"
+//     },
+//     "phone" : { 
+//         "format" : "phone",
+//         "value" : "(555) 555-5555" TODO check what formats PHP telephone parsing/validation supports
+//     }
+// }
+
+```
 
 ## Response shapes
 All replies are in JSON, and comply(mostly) with JSend response shape. 

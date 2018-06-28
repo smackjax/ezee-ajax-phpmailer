@@ -1,20 +1,5 @@
 <?php 
-// "emailVals": {
-//     "name": "Man Guy",
-//     -- OR ---
-//     "name": {
-//         "format" : "text",
-//         "value" : "Man Guy"
-//     },
-//     "email" : { 
-//         "format" : "email",
-//         "value" : "somewhere@here.com"
-//     },
-//     "phone" : { 
-//         "format" : "phone",
-//         "value" : "(555) 555-5555" TODO check what formats PHP telephone parsing/validation supports
-//     }
-// }
+
 
 // If the beginning of the key(separated by a dash) matches one of these strings,
 // will automatically set to the corresponding format if no 'format' was passed in the array
@@ -54,9 +39,6 @@ function check_value_validity($value, $format) {
     if($format == 'url' || $format == 'link'){
         return filter_var($value, FILTER_VALIDATE_URL);
     }
-    if($format == 'text' || $format == 'string'){
-        return true;
-    }
     return true;
 }
 
@@ -65,19 +47,18 @@ function sanitize_value($value, $format) {
     
     if($format == 'phone'){
         $digits = preg_replace('/[^0-9]/','',$value);
-        $numberOfDigits = strlen($digits);
         // Formats phone number to make it pretty
         $formatted_number = '';
-        if ( $numberOfDigits == 11 ) { 
+        if ( strlen($digits) == 11 ) { 
             $formatted_number .= ('+' . $digits[0] . ' ');
             $digits = substr($digits, 1, 10);
         }
-        if ( $numberOfDigits == 10 ) { 
-            $formatted_number .= ('(' . substr($digits, 0,2) . ') '); 
+        if ( strlen($digits) == 10 ) { 
+            $formatted_number .= ('(' . substr($digits, 0, 3) . ') '); 
             $digits = substr($digits, 3, 9);
         }
-        if ( $numberOfDigits == 7 ) { 
-            $formatted_number .=  (substr($digits, 0, 2) . '-' .substr($digits, 0, 6) );
+        if ( strlen($digits) == 7 ) { 
+            $formatted_number .=  (substr($digits, 0, 3) . '-' .substr($digits, 3, 7) );
         }
         return $formatted_number;
     }
@@ -90,15 +71,17 @@ function sanitize_value($value, $format) {
     if($format == 'float'){
         return filter_var($value, FILTER_VALIDATE_FLOAT);
     }
-    if($format == 'url' || 'link'){
+    if($format == 'url' || $format == 'link'){
         return filter_var($value, FILTER_SANITIZE_URL);
     }
-    if($format == 'text' || 'string'){
-        return filter_var($value, FILTER_SANITIZE_STRING);
+    if($format == 'text' || $format == 'string'){
+        return strip_tags($value);
     }
     if($format == 'html'){
         return filter_var($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     }
+    // Default to returning empty string
+    return '';
 }
 
 

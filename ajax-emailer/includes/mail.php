@@ -15,7 +15,7 @@ function send_email(){
     global $ezee_email_send_from_config;
     global $ezee_email_send_to_config;
     global $ezee_email_body_config;
-    global $default_plain_text_body;
+    global $default_email_body;
 
     // TODO check for absolutely required vars and throw errors
     $from = $ezee_email_send_from_config;
@@ -74,23 +74,24 @@ function send_email(){
     
         // --- Email details
         // Is html
-        $is_html = false;
+        // It always seems to send html, even with this set to false
+        $is_html = true;
         if(isset($ezee_email_body_config) && isset($ezee_email_body_config['is_html'])){
             $is_html = $ezee_email_body_config['is_html'];
         }
-        $mail->isHTML($is_html);
+        $mail->IsHTML($is_html);
 
         // Subject
         $mail->Subject = $to['subject'];
 
         // Body
-        $email_body = $default_plain_text_body;
+        $email_body = $default_email_body;
         if(isset($ezee_email_body_config) && isset($ezee_email_body_config['template'])){
             $email_body = $ezee_email_body_config['template'];
         }
         $mail->Body = $email_body;
         // Alt body is always plain text
-        $mail->AltBody = $default_plain_text_body;
+        $mail->AltBody = $default_email_body;
     
 
         // Send email
