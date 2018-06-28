@@ -20,8 +20,6 @@ var defaultEmailValFormats = {
     'email' : 'email',
     'phone' : 'phone',
     'message' : 'text',
-    // 'cars' should default to 'text' format
-    // TODO check other input parse types
 };
 
 function getEmailDataFormats(formVals) {

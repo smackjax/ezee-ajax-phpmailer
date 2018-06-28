@@ -25,22 +25,33 @@ function send_email(){
     }
     $to = $ezee_email_send_to_config;
     
-
-
     $from_email_address = make_email_array($from['email']);
 
     try {
         //Server settings
         $mail->SMTPDebug    = 0; // Enable verbose debug output
         $mail->isSMTP();        // Set mailer to use SMTP
-        $mail->Host         = $from['server'];  // Specify main and backup SMTP servers
         $mail->SMTPAuth     = true;  // Enable SMTP authentication
+
+        // SSL encryption
+        if(isset($from['encryption_type'])){
+            $mail->SMTPSecure   = $from['encryption_type']; // Enable TLS encryption, `ssl` also accepted     
+        }
+
+        // Connection
+        $mail->Host         = $from['server'];  // Specify main and backup SMTP servers   
         $mail->Username     = $from_email_address[0]; // SMTP username
         $mail->Password     = $from['password']; // SMTP password
-        $mail->SMTPSecure   = $from['encryption_type']; // Enable TLS encryption, `ssl` also accepted
         $mail->Port         = $from['port']; // TCP port to connect to
-        $mail->setFrom('max@maxbernard.design', 'Max Bernard');
-        
+
+        // Send from
+        $send_from_address;
+        if(isset($from['send_as'])){
+            $send_from_address = make_email_array($from['send_as']);
+        } else {
+            $send_from_address = $from_email_address;
+        }
+        call_user_func_array([$mail, 'setFrom'], $send_from_address);        
         
         // Recipients
         $send_to_addresses= format_send_to_addresses($to['addresses']);
@@ -61,20 +72,17 @@ function send_email(){
         }
 
         // Reply to
-
         $reply_to; 
-        if(!isset($to['reply_to'])){
+        if(isset($to['reply_to'])){
             $reply_to = make_email_array($to['reply_to']); 
         } else {
-            $reply_to = make_email_array($from['email']); 
+            $reply_to = make_email_array($from_email_address); 
         }
-         
         call_user_func_array([$mail, 'addReplyTo'], $reply_to); 
-     
     
         // --- Email details
         // Is html
-        // It always seems to send html, even with this set to false
+            // It always seems to send html, even with this set to false
         $is_html = true;
         if(isset($ezee_email_body_config) && isset($ezee_email_body_config['is_html'])){
             $is_html = $ezee_email_body_config['is_html'];
@@ -89,15 +97,31 @@ function send_email(){
         if(isset($ezee_email_body_config) && isset($ezee_email_body_config['template'])){
             $email_body = $ezee_email_body_config['template'];
         }
-        $mail->Body = $email_body;
-        // Alt body is always plain text
-        $mail->AltBody = $default_email_body;
-    
+
+        // If not html, set body explicitly
+        if($is_html){
+            $mail->msgHTML($email_body);
+        } else {
+            $mail->Body = $email_body;
+            $mail->AltBody = $default_email_body;
+        }
+        
+
+        // Word wrap(defaults to 72)
+        $word_wrap;
+        if(isset($ezee_email_body_config) && isset($ezee_email_body_config['word_wrap'])){
+            $word_wrap = $ezee_email_body_config['word_wrap'];
+        } else {
+            $word_wrap = 72;
+        }
+        $mail->WordWrap = $word_wrap;
 
         // Send email
         if(!$mail->send()){
+            // Return error message if something goes wrong
             return $mail->ErrorInfo;
         } else {
+            // Return true if successful
             return true;
         }
     } catch (Exception $e) {
@@ -110,6 +134,8 @@ function make_email_array($email_address){
     $new_address;
     if(!is_array($email_address)){
         $new_address = [$email_address];
+    } else {
+        $new_address = $email_address;
     }
     return $new_address;
 }

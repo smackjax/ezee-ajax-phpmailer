@@ -5,7 +5,7 @@ function create_default_email_body($email_values) {
     foreach($email_values as $name => $value){
         $email_body .= "
             <div>
-                <b>$name:</b>  $value
+                <b>$name:</b><br />  $value
             </div>
             <br />
         ";
