@@ -17,9 +17,10 @@ function send_email(){
     global $ezee_email_body_config;
     global $default_plain_text_body;
 
+    // TODO check for absolutely required vars and throw errors
     $from = $ezee_email_send_from_config;
     // Gives default email to send from
-    if(is_null($from['send_as'])){
+    if(isset($from['send_as'])){
         $from['send_as'] = $from['email'];
     }
     $to = $ezee_email_send_to_config;
@@ -30,8 +31,8 @@ function send_email(){
 
     try {
         //Server settings
-        $mail->SMTPDebug    = 2; // Enable verbose debug output
-        $mail->isSMTP(); // Set mailer to use SMTP
+        $mail->SMTPDebug    = 0; // Enable verbose debug output
+        $mail->isSMTP();        // Set mailer to use SMTP
         $mail->Host         = $from['server'];  // Specify main and backup SMTP servers
         $mail->SMTPAuth     = true;  // Enable SMTP authentication
         $mail->Username     = $from_email_address[0]; // SMTP username
@@ -50,7 +51,7 @@ function send_email(){
                 call_user_func_array([$mail, 'addAddress'], $address); 
             }
             // Checks if this is a CC, defaults to BCC
-            if(!is_null($address[2]) && $address[2] === true){
+            if(isset($address[2]) && $address[2] === true){
                 // Only grabs the first two values(email and name)
                 $params = [ $address[0], $address[1] ];
                 call_user_func_array([$mail, 'AddCC'], $params);
@@ -60,14 +61,21 @@ function send_email(){
         }
 
         // Reply to
-        $reply_to = make_email_array($from['reply_to']);
+
+        $reply_to; 
+        if(!isset($to['reply_to'])){
+            $reply_to = make_email_array($to['reply_to']); 
+        } else {
+            $reply_to = make_email_array($from['email']); 
+        }
+         
         call_user_func_array([$mail, 'addReplyTo'], $reply_to); 
      
     
         // --- Email details
         // Is html
         $is_html = false;
-        if(!is_null($ezee_email_body_config) && !is_null($ezee_email_body_config['is_html'])){
+        if(isset($ezee_email_body_config) && isset($ezee_email_body_config['is_html'])){
             $is_html = $ezee_email_body_config['is_html'];
         }
         $mail->isHTML($is_html);
@@ -77,7 +85,7 @@ function send_email(){
 
         // Body
         $email_body = $default_plain_text_body;
-        if(!is_null($ezee_email_body_config) && !is_null($ezee_email_body_config['template'])){
+        if(isset($ezee_email_body_config) && isset($ezee_email_body_config['template'])){
             $email_body = $ezee_email_body_config['template'];
         }
         $mail->Body = $email_body;
@@ -108,11 +116,10 @@ function make_email_array($email_address){
 function format_send_to_addresses($raw_addresses){
     $send_to_addresses = [];
     if(!is_array($raw_addresses)){
-        $send_to_addresses = make_email_array($raw_addresses);
+        $send_to_addresses[] = make_email_array($raw_addresses);
     } else {
         foreach($raw_addresses as $address){
             if(!is_array($address)){
-
                 $send_to_addresses[] = make_email_array($address);
             } else {
                 $send_to_addresses[] = $address;

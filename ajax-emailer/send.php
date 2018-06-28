@@ -2,7 +2,7 @@
 try{
     // If POST request to this page
     if($_SERVER['REQUEST_METHOD'] == 'POST'){
-        require_once('emailer-stuff/parse-email-vals.php');
+        require_once('includes/parse-email-vals.php');
         // Parse json values from posted values
         $email_vals = json_decode(file_get_contents('php://input'), true);
 
@@ -15,20 +15,25 @@ try{
             $response_data->failed = $parsed_data['invalid_keys'];
             $response_code = 400;
         } else {
+
             // Mailer config
             require_once('config.php');
-            // Function for default and alt email body(plain text )
+            // Function to create default and alt email body(plain text )
+            // stores output in GLOBAL
             require_once('includes/create-plain-text-email-body.php');
-            $email_body = create_plain_text_email_body($parsed_data['cleaned_vals']);
+            create_plain_text_email_body($parsed_data['cleaned_vals']);
             // PHPMailer function
             require_once('includes/mail.php');
             // Email data 
-            $email_success = send_email($email_body);
+            $email_result = send_email();
             if($email_result === true) { $response_code = 200; }
             else {
                 header('Content-type: text/html', true, 500);
                 echo $email_result;
+                exit();
             }
+
+            $response_code = 200;
         }
 
         respond($response_code, $response_data);
