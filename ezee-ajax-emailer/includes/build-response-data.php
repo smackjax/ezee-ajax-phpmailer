@@ -1,6 +1,4 @@
 <?php 
-
-
 // If the beginning of the key(separated by a dash) matches one of these strings,
 // will automatically set to the corresponding format if no 'format' was passed in the array
 $default_key_formats = [
@@ -87,17 +85,6 @@ function sanitize_value($value, $format) {
     return '';
 }
 
-// Ensures no null value where it would cause errors
-function get_val($value){
-    if(is_array($value) && isset($value['value'])){
-        return $value['value'];
-    } 
-    if(!is_array($value) && !is_object($value) && isset($value)){
-        return $value;
-    } 
-    return '';
-}
-
 // Takes array of key=>value input name/input value pairs
 function get_email_val_data($raw_posted_vals) {
     // Holds keys of values that fail 
@@ -106,13 +93,17 @@ function get_email_val_data($raw_posted_vals) {
     $cleaned_vals = [];
 
     // Check if all required inputs were sent
-    $required_fails = check_for_required($raw_posted_vals);
+    $required_fails = check_required_keys_and_values($raw_posted_vals);
     $invalid_keys = $required_fails;
 
     //  Parse values from array passed in
     foreach($raw_posted_vals as $key => $posted_val){
-        // At worst this will be an empty string
-        $raw_value = get_val($posted_val);
+        // If value is null, set invalid flag and change to empty string
+        $raw_value = get_true_val($posted_val);
+        if(!isset($raw_value)){
+            $invalid_keys[$key] = 'Value null or not set';
+            $raw_value = '';
+        }
 
         // Get format
         $format;
@@ -125,16 +116,15 @@ function get_email_val_data($raw_posted_vals) {
         }
 
         // If key not already invalid
-        if(!isset($invalid_keys[$key])){
-            $fail_message = false;
-            $fail_message = check_for_fail_message($key, $posted_val, $format);
-            // Add to invalid keys if invalid
-            if($fail_message !== false) {
-                // Add key to invalid keys
-                $invalid_keys[$key] = $fail_message;
+        if(!isset($invalid_keys[$key])){ 
+            // Check for validity
+            $is_valid = check_value_validity($raw_value, $format);
+            // If validation failed
+            if(!$is_valid){
+                // Set invalid msg
+                $invalid_keys[$key] = 'Invalid format';
             }
         }
-
 
         // Store raw value
         $raw_vals[$key] = $raw_value;
@@ -176,64 +166,52 @@ function get_value_format($key){
     return $format;
 }
 
-
-// Returns fail message if it encounters a fail condition
-// If no fail condition, returns false
-function check_for_fail_message($key, $value, $format){
-    // Check for null
-    if(is_array($value)){
-        if(!isset($value['value'])){
-            return 'No value';
+// Gets true value of received variable
+function get_true_val($raw_value){
+    // Value is array
+    if(is_array($raw_value)){
+        if(!isset($raw_value['value'])){
+            return null;
+        } else { 
+            return $raw_value['value'];
+        }
+    // If value is not array
+    } else {
+        if(isset($raw_value)){
+            return $raw_value;
+        } else { 
+            return null;
         }
     }
-    if( !isset($value) ){
-        return 'No value';
-    }
-    
-    // Check for validity
-    $is_valid = check_value_validity($value, $format);
-    // If validation failed
-    if(!$is_valid){
-        'Invalid format';
-    }
-    return false;
-}
+};
 
-function check_for_required($raw_values){
+// TODO could optimize this to check required and validate on the same pass
+function check_required_keys_and_values($raw_values){
+    // Fail messages
+    $msg_required = 'Required';
+    $msg_is_null = 'Value null or not set';
+    $msg_wrong_val = 'Wrong value';
     $invalid_keys = [];
-    global $ezee_email_required_values;
-    // Ignore if no required values are set
-    if(isset($ezee_email_required_values)){
-        // Check each required key
-        foreach($ezee_email_required_values as $value){
-            $key_to_check;
-            if(is_array($value)){
-                $key_to_check = $value[0];
+    // If there are required values 
+    global $ezee_email_value_options;
+    if(isset($ezee_email_value_options) && isset($ezee_email_value_options['required_values']) ) {
+        $required_vals = $ezee_email_value_options['required_values'];
+        // Loop through required values
+        foreach( $required_vals as $req_key => $required_val ){
+            // Check that required key exists
+            if(!array_key_exists($req_key, $raw_values)){
+                $invalid_keys[$req_key] = $msg_required;
+            // Check received value is not null
             } else {
-                $key_to_check = $value;
-            }
-
-            $key_sent = key_exists($key_to_check, $raw_values);
-            // If key wasn't sent
-            if(!$key_sent){
-                $invalid_keys[$key_to_check] = "Required";
-            }
-
-            // Check for required matching value
-            if( is_array($value) && isset($raw_values[$key_to_check]) ){
-                $required_val = $value[1];
-                $posted_val;
-                if(is_array($raw_values[$key_to_check])){
-                    $posted_val = $raw_values[$key_to_check]['value'];
-                } else {
-                    $posted_val = $raw_values[$key_to_check];
-                }
-
-                if($required_val != $posted_val){
-                    $invalid_keys[$key_to_check] = "Doesn't match required value";
+                $raw_value = get_true_val($raw_values[$req_key]);
+                if(is_null($raw_value)) {
+                    $invalid_keys[$req_key] = $msg_is_null;
+                // If there is a required value, compare with value received
+                } elseif( isset($required_vals[$req_key] ) &&  ( $required_vals[$req_key] != $raw_value ) ){
+                    $invalid_keys[$req_key] = $msg_wrong_val;
                 }
             }
-
+            
         }
     }
     return $invalid_keys;
