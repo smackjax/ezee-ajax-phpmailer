@@ -2,35 +2,28 @@
 // ---- NOTE: To use this file, edit and copy(or rename) to config.php into parent folder. 
 // A config.php IN THIS FOLDER DOES NOTHING
 
-
 global $ezee_email_vals;
 $name = $ezee_email_vals['name'];
-$email = $ezee_email_vals['email'];
 
-
-// Where the email will be sent from (required)
+// Where email is sent from
 $ezee_email_send_from_config = [
-    'encryption_type' => 'tls', // (optional) 'ssl' or 'tls' 
+    'encryption_type' => 'tls', // 'ssl' or 'tls'
     'port' => 587, 
-    'server' => 'smtp.gmail.com', // Can also take secondary server separated by a comma
-    'email' => ['an.email@gmail.com', 'Name to send as'],
-    'password' => 'xxxxxx' // Password for address server
+    'server' => 'smtp.gmail.com', 
+    'email' => 'my.email@gmail.com',
+    'password' => 'xxxxxxxx' // Password for address server
 ];
 
-// Config for where the email will be sent to (required)
+// Where email is sent to
 $ezee_email_send_to_config = [
-    'addresses' => ['an.email@gmail.com', 'Name of recipient'],
+    // You can send the email to yourself
+    'addresses' => 'my.email@somewhere.com',
     'subject' => "Contact from $name",
-    'reply_to' => [$email, $name]
 ];
 
-// (required)
+// With both flags off, you don't have to set required_values
 $ezee_email_value_options = [
     'limit_to_required' => false,
     'fail_on_value_overload' => false, 
-    
-    // Using this without flags or required keys is not as safe
-    // 'required_values' => [
-        // 'a_key' => 'a_value'
-    // ]
 ];
+
