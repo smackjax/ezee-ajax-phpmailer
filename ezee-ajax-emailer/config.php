@@ -39,6 +39,22 @@ $ezee_email_send_to_config = [
     // ['somewhere@else.com', 'my name']
 ];
 
+// (required)
+$ezee_email_value_options = [
+    // Only email values under 'required_vals' keys (default true)
+    'limit_to_required' => true,
+    // Request fails if 'limit_to_required' is true (default true)
+    // and more inputs than required are posted
+    'fail_on_value_overload' => false, 
+    
+    // Required posted keys and values
+    'required_values' => [
+        // If required value is set to null, the key just has to be present
+        'jumper' => null,
+        'barry' => 'bob',
+    ]
+];
+
 // is_html defaults to true, and uses msgHTML which automatically builds a plain text version if needed.
 // Everything below is optional, even the $ezee_email_body_config variable
 $ezee_email_body_config = [
@@ -63,29 +79,3 @@ $ezee_email_body_config = [
     "
 ];
 
-
-// (optional)
-$ezee_email_required_values = [
-    // If just a string, it means that key is required in submitted values
-    'jumper',
-    // If an array, key required is on left, and the value that has to match is on right
-    ['barry', 'trolo']
-    
-];
-
-// (optional)
-$ezee_email_value_options = [
-    // Only email values under 'required_vals' keys 
-    'limit_to_required' => false,
-    // Request fails if 'limit_to_required' is true 
-    // and more inputs than required are posted
-    'fail_on_value_overload' => false, 
-
-    'required_values' => [
-        // If just a string, it means that key is required to be sent in submitted values
-        'jumper' => null,
-        // If an array, key required is on left, and the value that has to match is on right
-        'barry' => 'bob',
-
-    ]
-];
