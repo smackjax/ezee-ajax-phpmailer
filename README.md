@@ -142,9 +142,9 @@ while a "fail" status sets the reason a key failed under `"failed"`
 ## config.php Examples
 ### Verbose
 ```php
-// All addresses besides the email used to sign into the server can be formatted as array with shape
+// All addresses can be formatted as an array with shape
     // ['address@somewhere.com', 'A name to send by']
-// GLOBAL['ezee_email_vals']['post-key'] holds all sanitized input values if everything goes well
+// GLOBAL['ezee_email_vals'][('post-key')] holds all sanitized input values if everything goes well
 global $ezee_email_vals;
 $name = $ezee_email_vals['name'];
 $email = $ezee_email_vals['email'];
@@ -194,8 +194,9 @@ $ezee_email_value_options = [
     'fail_on_value_overload' => false, 
     
     // Required posted keys and values
+    // If required value is set to null, the received value can be anything(*anything but null).
     'required_values' => [
-        // If required value is set to null, the key value can be anything
+        // e.g., the 'name' key could hold a number, or text
         'name' => null,
         // For clarity: this would be like a text box with 
         // the 'name' set to 'two-plus-two' and value set to '4'
