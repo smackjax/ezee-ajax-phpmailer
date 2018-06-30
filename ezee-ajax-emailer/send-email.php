@@ -3,7 +3,7 @@ try{
     // If POST request to this page
     if($_SERVER['REQUEST_METHOD'] == 'POST'){        
         // Mailer config
-        require_once('config.php');
+        require('config.php');
         // Limit values being emailed to ones defined in $ezee_email_value_options['required_values']
         $limit_values_to_required = true;
         // Respond with fail if too many/too few values
@@ -68,7 +68,9 @@ try{
         // The magic
         require_once('includes/build-response-data.php');
         $response_data = get_email_val_data($email_vals);
-
+        // TODO this is sloppy. It overwrites previous config data with new sanitized values available
+        require('config.php');
+        
         // Checks for fail conditions
         if(isset($response_data['failed']) && $response_data['failed'] !== false){
             // If there are fail conditions, respond 400

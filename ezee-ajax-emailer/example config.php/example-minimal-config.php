@@ -1,6 +1,7 @@
 <?php 
-// Separate fiel for actual login info, or just hardcode below
-require('email_login.php');
+// ---- NOTE: To use this file, edit and copy(or rename) to config.php into parent folder. 
+// A config.php IN THIS FOLDER DOES NOTHING
+
 
 global $ezee_email_vals;
 $name = $ezee_email_vals['name'];
@@ -12,17 +13,13 @@ $ezee_email_send_from_config = [
     'encryption_type' => 'tls', // (optional) 'ssl' or 'tls' 
     'port' => 587, 
     'server' => 'smtp.gmail.com', // Can also take secondary server separated by a comma
-    'email' => [$my_secret_email, 'Maximus Prime'],
-    'password' => $my_secret_pass // Password for address server
+    'email' => ['an.email@gmail.com', 'Name to send as'],
+    'password' => 'xxxxxx' // Password for address server
 ];
 
 // Config for where the email will be sent to (required)
 $ezee_email_send_to_config = [
-    // If you want to send a 'name' when you have only one recipient,
-    // this still needs to be an array of arrays
-    'addresses' => [
-        [$my_secret_email, 'Hunky-dory']
-    ],
+    'addresses' => ['an.email@gmail.com', 'Name of recipient'],
     'subject' => "Contact from $name",
     'reply_to' => [$email, $name]
 ];
