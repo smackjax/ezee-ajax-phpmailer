@@ -1,7 +1,6 @@
-# Go away
-## (it's not ready yet)
-In the future this will hopefully be an easy(er) to work with wrapper for PHPMailer that will support AJAX requests.
-I'll be updating this Readme to cut down on the final documentation, but everything is subject to change.
+# Ajax JSON PHPMailer wrapper
+## The goal
+An easy-to-use interface for PHPMailer that takes a JSON object and emails the values, replying with JSON
 
 ## Use
 1. Edit `config.php` values
@@ -16,14 +15,14 @@ Otherwise, feel free to open a PR or submit ideas.
 * When submitting data as an array, `value` **has** to be set to something, even if just an empty string. Otherwise `value` will default to `null`, a fail condition
 * If there are fail conditions the email is not sent
 * Phone numbers are parsed based on number of integers in the string: 7, 10, 11. Other chars in the string don't matter
-* All values recieved are always returned without being cleaned. Values are only cleaned according to their format when they are about to be emailed.
-* 'string' or 'text' format values are only stripped of html tags
-* Additional recipients added will be BCC'd, but it may not be reliable to tell the primary recipient based on array order
+* Values received will be returned unchanged under the 'raw' key
+* 'string' or 'text' format values are only run through strip_tags()
+* Additional recipients added will be BCC'd, but I haven't tested the primary recipient based on array order
 * Uses msgHTML(rather than 'Body'), unless IsHTML is set to false
 * $mail->isSMTP &  $mail->SMTPAuth are both always true
-* The default email body(HTML) function is in `includes/create-default-email-body.php`
+* The default email body template function is in `includes/create-default-email-body.php`
 
-## Default input format types
+## Default input JSON format types
 If the beginning of the JSON submitted key(separated by a dash) matches one of these strings, the format used to validate/clean the value will automatically set to the corresponding format shown here if no 'format' was passed in the JSON array.
 
 Example: The values under keys `"phone-cell"`, `"phone-home"`, and `"phone-intergalactic"` will be validated/parsed as phone numbers, unless their "format" is set explicitly.
@@ -70,13 +69,13 @@ You can override default formats(see above) by sending them in the array
 
 ## Response shapes
 All replies are in JSON, and comply(mostly) with JSend response shape. 
-A `"status"` of "fail" or "success" always returns the received data unchanged under the `"sent"` key,
+A `"status"` of "fail"(with data) or "success" always returns the received data unchanged under the `"raw"` key,
 while a "fail" status sets the reason a key failed under `"failed"`
 ### Errors
 ```javascript
 { // Server errors
     "status" : "error", 
-    "message" : "(Error message")
+    "message" : "Error message"
 }
 ```
 ### Failure(probably user error)
@@ -84,7 +83,7 @@ while a "fail" status sets the reason a key failed under `"failed"`
 { // User errors
     "status" : "fail",
     "data" : { 
-        // Holds keys of any values that failed validation of their format
+        // Holds keys of any values that failed and their failure message
         "failed": {
             "phone": "Invalid format",
             "email": "Invalid format",
@@ -93,7 +92,7 @@ while a "fail" status sets the reason a key failed under `"failed"`
             "hidden-field" : "Value did not match required value",
             /*,...etc*/
         },
-        // Values the server received
+        // Values the server received(unchanged)
         "raw": { 
             "name"  : "(Raw value)", 
             "phone" : "(Raw value)", 
@@ -107,9 +106,16 @@ while a "fail" status sets the reason a key failed under `"failed"`
             "email" : "(Sanitized value)"
         }
     }
-    // NOTE: If no data is sent, there will be a 'message' key here
 }
 ```
+-- **OR** --
+```javascript
+{ // User errors
+    "status" : "fail",
+    "message" : "Error message"
+}
+```
+
 ### Success
 ```javascript
 { // Success
@@ -151,16 +157,20 @@ $ezee_email_send_from_config = [
     'encryption_type' => 'tls', // (optional) 'ssl' or 'tls' 
     'port' => 587, 
     'server' => 'smtp.gmail.com', // Can also take secondary server separated by a comma
-    'email' => 'smackjax@gmail.com', // Email address on server
+    'email' => 'my.email@gmail.com', // Email address on server
     // or ['address', 'name'](name will be applied to send_as)
     'password' => '' // Password for address server
-    'send_as' => 'otherEmail@somewhere.com' // (optional) defaults to value in 'email'
+    'send_as' => 'an.alias@sneaky.com' // (optional) defaults to value in 'email'
     // or ['address', 'name']
 ];
 
 // Config for where the email will be sent to (required)
 $ezee_email_send_to_config = [
-    'addresses' => 'smackjax@gmail.com',
+    'addresses' => 'addresses' => [
+        'liv.ia@kaboom.com',
+        ['man@guy.com', 'Man Guy'],
+        [ 'stark@tech.com', 'Mr Stark', true ]  // <-- Will be CC
+    ],
     // Address@somewhere.com
     // ['address@somewhere.com', 'Maximus Prime']
     /* Multiple addresses can be specified, defaults to BCC for each address after the first(see notes)
@@ -175,11 +185,29 @@ $ezee_email_send_to_config = [
     // ['somewhere@else.com', 'my name']
 ];
 
+// Flags and required values for POSTed JSON (required)
+$ezee_email_value_options = [
+    // Only email values under 'required_vals' keys (default true)
+    'limit_to_required' => true,
+    // Request fails if 'limit_to_required' is true (default true)
+    // and more inputs than required are posted
+    'fail_on_value_overload' => false, 
+    
+    // Required posted keys and values
+    'required_values' => [
+        // If required value is set to null, the key value can be anything
+        'name' => null,
+        // For clarity: this would be like a text box with 
+        // the 'name' set to 'two-plus-two' and value set to '4'
+        'two-plus-two' => '4',
+    ]
+];
+
 // is_html defaults to true, and uses msgHTML which automatically builds a plain text version if needed.
 // Everything below is optional, even the $ezee_email_body_config variable
 $ezee_email_body_config = [
     'word_wrap'=> 50, // Defaults to 72, set 0 for no wrapping
-    'is_html' => true,
+    'is_html' => true, // Defaults to true
     'template' => "
         <html>
             <h2>New contact request</h2>
@@ -199,15 +227,7 @@ $ezee_email_body_config = [
     "
 ];
 
-// (optional)
-$ezee_email_required_values = [
-    // If array, key is required, and value under that key must match the second value
-    ['name', 'Cassandra'],
-    // If just a string, it means that key is required in submitted values
-    'not-there',
-    ['hidden-field', 'secret-pass']
-    // ^ key(req)         ^ value under key must match this
-];
+
 ```
 
 ### Minimal
@@ -220,18 +240,21 @@ $ezee_email_send_from_config = [
     'encryption_type' => 'tls', // 'ssl' or 'tls'
     'port' => 587, 
     'server' => 'smtp.gmail.com', 
-    'email' => 'some.email@gmail.com',
+    'email' => 'my.email@gmail.com',
     'password' => 'xxxxxxxx' // Password for address server
 ];
 
 // Where email is sent to
 $ezee_email_send_to_config = [
-    'addresses' => [
-        'liv.ia@kaboom.com',
-        ['man@guy.com', 'Man Guy'],
-        [ 'stark@tech.com', 'Mr Stark', true ]  // <-- Will be CC
-    ],
-    'subject' => "Contact from $name", // Sanitized values can be used here
+    // You can send the email to yourself
+    'addresses' => 'my.email@somewhere.com',
+    'subject' => "Contact from $name",
+];
+
+// With both flags off, you don't have to set required_values
+$ezee_email_value_options = [
+    'limit_to_required' => false,
+    'fail_on_value_overload' => false, 
 ];
 
 // Uses default email body
