@@ -1,7 +1,12 @@
-<?php 
+<?php
+// Functions for response
+require_once('response-functions.php');
+// Sends fatal errors as JSON
+require_once('fatal-error-handling.php');
+
 try{
     // If POST request to this page
-    if($_SERVER['REQUEST_METHOD'] == 'POST'){        
+    if($_SERVER['REQUEST_METHOD'] == 'POST'){
         // Mailer config
         require('config.php');
         // Limit values being emailed to ones defined in $ezee_email_value_options['required_values']
@@ -28,7 +33,7 @@ try{
             }
         }
 
-        
+      
         // Parse json values from posted
         $posted_vals = json_decode(file_get_contents('php://input'), true);
         // Validates and sanitizes received data
@@ -101,28 +106,4 @@ try{
 
 } catch(Exception $e){
     respond_server_error($e->getMessage());
-}
-
-function respond($code, $data_obj, $status){
-    header('Content-type: application/json', true, $code);
-    $data_obj['status'] = $status;
-    echo json_encode($data_obj);
-}
-function respond_user_error($data_obj){
-    $response = [
-        'data'=>$data_obj
-    ];
-    respond(400, $response, 'fail');
-}
-function respond_user_error_msg($msg){
-    $data_obj = [
-        'message'=>$msg
-    ];
-    respond(400, $data_obj, 'fail');
-}
-function respond_success($data_obj){
-    $response = [
-        'data'=>$data_obj
-    ];
-    respond(200, $response, 'success');
 }
