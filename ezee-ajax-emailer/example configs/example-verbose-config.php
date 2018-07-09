@@ -62,9 +62,12 @@ $ezee_email_value_options = [
     'required_values' => [
         // e.g., the 'name' key could hold a number, or text
         'name' => null,
-        // For clarity: this would be like a text box with 
-        // the 'name' set to 'two-plus-two' and value set to '4'
-        'two-plus-two' => '4',
+        /* This is for if you have an optional input, like a 
+        message, that may or may not be submitted at all */
+        'optional-val' => '(opt)',
+        /* For clarity: this would be like a text box with 
+         the 'name' set to 'two-plus-two' and value set to '4' */
+        'two-plus-two' => '4'
     ]
 ];
 

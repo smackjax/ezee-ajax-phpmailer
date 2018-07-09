@@ -9,12 +9,22 @@ function handleContactForm(formVals, formElement) {
     var dataWithFormats = prepJsonWithDefaultFormat(formVals);
     emailAjaxData(dataWithFormats)
     .then(resData=>{
-        console.log(JSON.parse(resData));
-        document.getElementById('output-test').innerHTML = resData;
+        console.log("----- RESPONSE ----- ");
+        console.log(resData);
+        console.log("---------- ");
+        resData.toString();
+        if(resData['status'] && resData['status'] === 'success'){
+            document.getElementById('output-test').innerHTML = 'Success!(code 200) Check console to see response.';
+        } else if(resData['status'] && resData['status'] === 'fail'){
+            document.getElementById('output-test').innerHTML = 'Fail.(code 400) Check console to see response.';
+        }else if(resData['status'] && resData['status'] === 'error'){
+            document.getElementById('output-test').innerHTML = 'Server Error.(code 500) Check console to see response.';
+        }
     })
-    // Network failure  
+    // Network failure/bad JSON
     .catch(e=>{
-        // Find out if this includes 500/400 codes
+        console.log(e);
+        document.getElementById('output-test').innerHTML = 'Catastrophic error';
     })
 }
 

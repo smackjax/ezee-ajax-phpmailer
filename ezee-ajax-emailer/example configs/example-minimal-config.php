@@ -26,4 +26,15 @@ $ezee_email_value_options = [
     'limit_to_required' => false,
     'fail_on_value_overload' => false, 
 ];
+// --- OR ---
+$ezee_email_value_options = [
+    'required_values' => [
+        // 'null' values means the key has to exist
+        'req-val'  => null,
+        // '(opt)' value means key is optional, and can hold any kind of data.
+        'optional-val' => '(opt)',
+        // A value besides null or (opt) means posted value must match
+        'must-be-foobar'  => 'foobar', 
+    ]
+];
 

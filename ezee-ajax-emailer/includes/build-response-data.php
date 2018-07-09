@@ -9,8 +9,7 @@ $default_key_formats = [
     'url' => 'url',
     'float' => 'float',
     'int' => 'int',
-    'num' => 'int',
-    'html' => 'html'
+    'num' => 'int'
 ];
 
 // I know this is repetitive, but ultimately I think 
@@ -77,9 +76,6 @@ function sanitize_value($value, $format) {
     }
     if($format == 'text' || $format == 'string'){
         return filter_var($value, FILTER_SANITIZE_STRING);
-    }
-    if($format == 'html'){
-        return filter_var($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     }
     // Default to returning empty string
     return '';
@@ -199,15 +195,22 @@ function check_required_keys_and_values($raw_values){
         // Loop through required values
         foreach( $required_vals as $req_key => $required_val ){
             // Check that required key exists
-            if(!array_key_exists($req_key, $raw_values)){
-                $invalid_keys[$req_key] = $msg_required;
+            if(!array_key_exists($req_key, $raw_values)) {
+                // If key doesn't exist, check if it's optional
+                if($required_val !== '(opt)'){
+                    $invalid_keys[$req_key] = $msg_required;
+                }
             // Check received value is not null
             } else {
                 $raw_value = get_true_val($raw_values[$req_key]);
                 if(is_null($raw_value)) {
                     $invalid_keys[$req_key] = $msg_is_null;
                 // If there is a required value, compare with value received
-                } elseif( isset($required_vals[$req_key] ) &&  ( $required_vals[$req_key] != $raw_value ) ){
+                } elseif(   
+                        isset($required_vals[$req_key] ) && 
+                        $required_vals[$req_key] !== '(opt)' && 
+                        $required_vals[$req_key] != $raw_value
+                ){
                     $invalid_keys[$req_key] = $msg_wrong_val;
                 }
             }

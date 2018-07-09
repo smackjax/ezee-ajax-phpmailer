@@ -4,6 +4,7 @@ function respond($code, $data_obj, $status){
     header('Content-type: application/json', true, $code);
     $data_obj['status'] = $status;
     echo json_encode($data_obj);
+    die();
 }
 function respond_server_error($message){
     $data = [];

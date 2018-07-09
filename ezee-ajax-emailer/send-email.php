@@ -1,8 +1,9 @@
 <?php
 // Functions for response
-require_once('response-functions.php');
+require_once('includes/response-functions.php');
 // Sends fatal errors as JSON
-require_once('fatal-error-handling.php');
+require_once('includes/fatal-error-handling.php');
+
 
 try{
     // If POST request to this page
@@ -17,7 +18,7 @@ try{
         global $ezee_email_value_options;
         // If values(including failsafes) aren't set, send error
         if(!isset($ezee_email_value_options)){
-            respond_server_error('CONFIG ERR: $ezee_email_value_options not found');
+            respond_server_error('config.php: $ezee_email_value_options not found');
             exit();
         } else {
             // Check overrides
@@ -29,7 +30,7 @@ try{
             }
             // If either flag is true but no values are marked as required
             if(($fail_on_overload === true || $limit_values_to_required === true) && !isset($ezee_email_value_options['required_values'])) {
-                respond_server_error('CONFIG ERR: Value limiting or failure on overload set, but no required values set');
+                respond_server_error('config.php: Value limiting or failure on overload set, but no required values set');
             }
         }
 
@@ -43,6 +44,15 @@ try{
             exit();
         }
 
+        // Fail if number of values posted was incorrect
+        if($fail_on_overload === true){
+            $required_vals = $ezee_email_value_options['required_values'];
+            if(count($required_vals) < count($posted_vals)){
+                $msg ='Too many values sent';
+                respond_user_error_msg($msg);
+                exit();
+            }
+        }
 
         // Holds either values under parsed keys or all submitted
         $email_vals;
@@ -59,15 +69,7 @@ try{
             $email_vals = $posted_vals;
         }
 
-        // Fail if number of values posted was incorrect
-        if($fail_on_overload === true){
-            $required_vals = $ezee_email_value_options['required_values'];
-            if(count($required_vals) !== count($email_vals)){
-                $msg ='Wrong number of values sent';
-                respond_user_error_msg($msg);
-                exit();
-            }
-        }
+        
 
 
         // The magic

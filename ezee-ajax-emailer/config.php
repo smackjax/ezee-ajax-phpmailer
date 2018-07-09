@@ -1,5 +1,10 @@
 <?php 
-// Separate fiel for actual login info, or just hardcode below
+// NOTE: This file is configured for the 'example'
+
+// Separate file for email login values with shape:  
+    // $my_secret_email = 'anEmail@server.com';
+    // $my_secret_pass = 'emailPassword';
+//or just hardcode email and password below
 require('email_login.php');
 
 global $ezee_email_vals;
@@ -28,11 +33,15 @@ $ezee_email_send_to_config = [
 
 // (required)
 $ezee_email_value_options = [
-    'limit_to_required' => false,
-    'fail_on_value_overload' => false, 
-    
-    // Using this without flags or required keys is not as safe
-    // 'required_values' => [
-        // 'a_key' => 'a_value'
-    // ]
+    // Using this without flags or required_values is not as safe
+    'required_values' => [
+        // 'null' values means the key has to exist
+        'name'  => null,
+        'phone-home'  => null,
+        'phone-cell' => null,
+        'email' => null,
+        // '(opt)' value means key is optional, and can hold any kind of data.
+        'message' => '(opt)',
+        'cars' => null,
+    ]
 ];

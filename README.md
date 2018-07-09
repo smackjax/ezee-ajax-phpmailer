@@ -21,6 +21,7 @@ Otherwise, feel free to open a PR or submit ideas.
 * Uses msgHTML(rather than 'Body'), unless IsHTML is set to false
 * $mail->isSMTP &  $mail->SMTPAuth are both always true
 * The default email body template function is in `includes/create-default-email-body.php`
+* If using a 'name' array format for the first address you're sending to, the whole variable must be an array of arrays
 
 ## Default input JSON format types
 If the beginning of the JSON submitted key(separated by a dash) matches one of these strings, the format used to validate/clean the value will automatically set to the corresponding format shown here if no 'format' was passed in the JSON array.
@@ -36,8 +37,7 @@ $default_key_formats = [
     'url' => 'url',
     'float' => 'float',
     'int' => 'int',
-    'num' => 'int',
-    'html' => 'html' // Encodes with FILTER_SANITIZE_SPECIAL_CHARS 
+    'num' => 'int'
 ];
 ```
 
@@ -139,7 +139,8 @@ while a "fail" status sets the reason a key failed under `"failed"`
 }
 ```
 
-## config.php Examples
+## config.php Examples(also in 'example configs')
+
 ### Verbose
 ```php
 // All addresses can be formatted as an array with shape
@@ -166,6 +167,9 @@ $ezee_email_send_from_config = [
 
 // Config for where the email will be sent to (required)
 $ezee_email_send_to_config = [
+    // NOTE: If using a name for the first address, this must
+        // be an array of arrays.
+        // Otherwise it will try to send the 'name' an email, resulting in failure.
     'addresses' => 'addresses' => [
         'liv.ia@kaboom.com',
         ['man@guy.com', 'Man Guy'],
@@ -198,9 +202,13 @@ $ezee_email_value_options = [
     'required_values' => [
         // e.g., the 'name' key could hold a number, or text
         'name' => null,
+        /* This is for if you have an optional input, like a 
+        message, that may or may not be submitted at all */
+        'optional-val' => '(opt)',
         // For clarity: this would be like a text box with 
         // the 'name' set to 'two-plus-two' and value set to '4'
         'two-plus-two' => '4',
+    
     ]
 ];
 
@@ -227,8 +235,6 @@ $ezee_email_body_config = [
         </html> 
     "
 ];
-
-
 ```
 
 ### Minimal
